@@ -1,0 +1,25 @@
+{% comment %} #show all notifications {% endcomment %}
+<html>
+    <head>
+        <title>Notifications</title>
+    </head>
+    <body>
+        <h1>Notifications</h1>
+        <table>
+            <tr>
+                <th>id</th>
+                <th>post</th>
+                <th>action</th>
+                <th>user</th>
+            </tr>
+            {% for notification in notifications %}
+            <tr>
+                <td>{{ notification.id }}</td>
+                <td>{{ notification.post }}</td>
+                <td>{{ notification.action }}</td>
+                <td>{{ notification.user }}</td>
+            {% endfor %}
+    </body>
+</html>
+
+
