@@ -3,6 +3,7 @@ from .models import Post, Notification
 
 
 class PostSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.username')
     class Meta:
         model = Post
         fields = ['id', 'title', 'description', 'state', 'user']

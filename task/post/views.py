@@ -1,6 +1,7 @@
 # from .serializers import UserSerializer
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib import auth
+from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from .serializers import PostSerializer, NotificationSerializer
 from rest_framework.response import Response
@@ -54,47 +55,53 @@ def post(request, post_id=None):
             serializer.save(user=request.user)
             
         # Send a notification to the admin that the post was created
-            notification = Notification.objects.create(
-                post=Post.objects.get(id=serializer.data['id']),
-                action="created",
-                user=user
-            )
+            # notification = Notification.objects.create(
+            #     post=Post.objects.get(id=serializer.data['id']),
+            #     action="created",
+            #     user=user
+            # )
             
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     elif request.method == "PUT":
         post = get_object_or_404(Post, pk=post_id)
         user = request.user
+        
+        print(post.description)
+        print(user)
 
         if post.user == user:
             serializer = PostSerializer(post, data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 
-        # Send a notification to the admin that the post was updated
-                notification = Notification.objects.create(
-                    post=post,
-                    action="updated",
-                    user=user
-                )
+        # # Send a notification to the admin that the post was updated
+        #         notification = Notification.objects.create(
+        #             post=post,
+        #             action="updated",
+        #             user=user
+        #         )
 
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
     
     elif request.method == "PATCH":
         post = get_object_or_404(Post, pk=post_id)
         user = request.user
+        print(post.description)
+        print(user)
 
         if post.user == user:
             serializer=PostSerializer(post, data=request.data, partial=True)
+            print(serializer)
             if serializer.is_valid():
                 serializer.save()
                
         # Send a notification to the admin that the post was updated
-                notification = Notification.objects.create(
-                    post=post,
-                    action="updated",
-                    user=user
-                )
+                # notification = Notification.objects.create(
+                #     post=post,
+                #     action="updated",
+                #     user=user
+                # )
         
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
     
@@ -103,11 +110,11 @@ def post(request, post_id=None):
         user = request.user
         
         if post.user == user:
-            notification = Notification.objects.create(
-                post=post,
-                action="deleted",
-                user=user
-            )
+            # notification = Notification.objects.create(
+            #     post=post,
+            #     action="deleted",
+            #     user=user
+            # )
             post.delete()
             
             return Response({'msg':'Data Deleted'})
@@ -115,9 +122,12 @@ def post(request, post_id=None):
     
 @api_view(["GET"])                 #for getting posts of a particular user
 def get_posts_for_user(request, username):
+    print(username)
     if request.user.is_superuser:
-        posts = Post.objects.filter(~Q(state='archived'), user=username)
+        user = User.objects.get(username=username)
+        posts = Post.objects.filter(~Q(state='archived'), user=user)
         serializer = PostSerializer(posts, many=True)
+        
         return Response(serializer.data, status=status.HTTP_200_OK)
  
     
